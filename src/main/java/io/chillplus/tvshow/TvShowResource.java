@@ -55,18 +55,19 @@ public class TvShowResource {
         TvShow tvShow = tvShows.stream().filter(t -> t.id == id).findFirst().orElse(null);
         return tvShow != null ? Response.ok(tvShow).build() : Response.status(Response.Status.NO_CONTENT).build();
     }
-    
-    @DELETE
-    public Response deleteAll() {
-        tvShows.clear();
-        return Response.ok().build();
-    }
 
     @DELETE
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteById(@PathParam("id") long id) {
         tvShows = tvShows.stream().filter(t -> t.id != id).collect(Collectors.toList());
+        return Response.ok().build();
+    }
+
+    @DELETE
+    @Path("/")
+    public Response deleteAll() {
+        tvShows.clear();
         return Response.ok().build();
     }
 }

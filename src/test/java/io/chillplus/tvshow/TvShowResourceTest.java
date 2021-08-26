@@ -93,11 +93,18 @@ public class TvShowResourceTest {
            .statusCode(Response.Status.NO_CONTENT.getStatusCode());
     }
 
+    @Test
+    @Order(6)
+    public void testDeleteByIdEndpoint() {
+        given()
+        .when().delete("/api/tv/{id}", 0L)
+        .then()
+           .statusCode(Response.Status.OK.getStatusCode());
+    }
 
     @Test
-    @AfterAll
+    @Order(7)
     public void testDeleteAllEndpoint() {
-
         given()
         .when().delete("/api/tv")
         .then()
