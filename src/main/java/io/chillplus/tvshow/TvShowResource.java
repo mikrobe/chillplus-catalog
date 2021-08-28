@@ -1,8 +1,6 @@
 package io.chillplus.tvshow;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -15,26 +13,29 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-//import org.jboss.logging.Logger;
-
 
 @Path("/api/tv")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class TvShowResource {
 
-//    private static final Logger LOG = Logger.getLogger(TvShowResource.class);
 
     static long nextId = 0;
-    static List<TvShow> tvShows = new ArrayList<>();
 
-    public TvShowResource() {
+    final TvShowService tvShowService;
+
+    public TvShowResource(TvShowService tvShowService) {
+        this.tvShowService = tvShowService;
+    }
+
+    private List<TvShow> getTvShows() {
+        return tvShowService.getTvShows();
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAll() {
-        return Response.ok(tvShows).build();
+        return Response.ok(getTvShows()).build();
     }
 
     @POST
@@ -44,7 +45,7 @@ public class TvShowResource {
             throw new WebApplicationException("No title specified. A title is required", 400);
         }
         TvShow tvShow = new TvShow(nextId++, createTvShowCommand.title, createTvShowCommand.category);
-        tvShows.add(tvShow);
+        getTvShows().add(tvShow);
         return Response.ok(tvShow).status(201).build();
     }
 
@@ -52,7 +53,7 @@ public class TvShowResource {
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getOneById(@PathParam("id") long id) {
-        TvShow tvShow = tvShows.stream().filter(t -> t.id == id).findFirst().orElse(null);
+        TvShow tvShow = getTvShows().stream().filter(t -> t.id == id).findFirst().orElse(null);
         return tvShow != null ? Response.ok(tvShow).build() : Response.status(Response.Status.NO_CONTENT).build();
     }
 
@@ -60,14 +61,13 @@ public class TvShowResource {
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteById(@PathParam("id") long id) {
-        tvShows = tvShows.stream().filter(t -> t.id != id).collect(Collectors.toList());
-        return Response.ok().build();
+        return tvShowService.deleteById(id) ?  Response.ok().build() :  Response.status(Response.Status.NO_CONTENT).build();
     }
 
     @DELETE
     @Path("/")
     public Response deleteAll() {
-        tvShows.clear();
+        getTvShows().clear();
         return Response.ok().build();
     }
 }
